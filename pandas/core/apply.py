@@ -1202,14 +1202,14 @@ class FrameApply(NDFrameApply):
             return self.wrap_results_for_axis(results, res_index)
 
         # dict of scalars
-
-        # the default dtype of an empty Series is `object`, but this
-        # code can be hit by df.mean() where the result should have dtype
-        # float64 even if it's an empty Series.
-        constructor_sliced = self.obj._constructor_sliced
-        if len(results) == 0 and constructor_sliced is Series:
-            result = constructor_sliced(results, dtype=np.float64)
+        if isinstance(self.obj, ABCDataFrame) and hasattr(self.obj, "_constructor_sliced"):
+            constructor_sliced = self.obj._constructor_sliced
+            if len(results) == 0 and constructor_sliced is Series:
+                result = constructor_sliced(results, dtype=np.float64)
+            else:
+                result = constructor_sliced(results, dtype=self.obj.dtypes[0])
         else:
+            constructor_sliced = self.obj._constructor_sliced
             result = constructor_sliced(results)
         result.index = res_index
 
