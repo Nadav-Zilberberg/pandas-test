@@ -462,7 +462,9 @@ def test_on_bad_lines_index_col_inferred(python_parser_only):
 """
     bad_sio = StringIO(data)
 
-    result = parser.read_csv(bad_sio, on_bad_lines=lambda x: ["99", "99"])
+    result = parser.read_csv_check_warnings(
+        ParserWarning, "Length of header or names", bad_sio, on_bad_lines=lambda x: ["99", "99"]
+    )
     expected = DataFrame({"a": [2, 5], "b": [3, 6]}, index=[1, 4])
     tm.assert_frame_equal(result, expected)
 
