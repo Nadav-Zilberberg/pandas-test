@@ -393,7 +393,7 @@ class NAType(C_NAType):
             return self.__repr__()
 
     def __bool__(self):
-        raise TypeError("boolean value of NA is ambiguous")
+        return False
 
     def __hash__(self):
         # GH 30013: Ensure hash is large enough to avoid hash collisions with integers
