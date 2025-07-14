@@ -146,6 +146,8 @@ The following are just some examples of operations that are accelerated by nativ
    ser_str.str.startswith("a")
 
 .. ipython:: python
+   :skipif:
+       sys.platform == 'win32'
 
    from datetime import datetime
    pa_type = pd.ArrowDtype(pa.timestamp("ns"))
