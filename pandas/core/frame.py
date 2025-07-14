@@ -8176,6 +8176,8 @@ class DataFrame(NDFrame, OpsMixin):
         return result
 
     def _should_reindex_frame_op(self, right, op, axis: int, fill_value, level) -> bool:
+        if not isinstance(right, DataFrame):
+            return False
         """
         Check if this is an operation between DataFrames that will need to reindex.
         """
