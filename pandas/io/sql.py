@@ -940,6 +940,7 @@ class SQLTable(PandasObject):
         schema=None,
         keys=None,
         dtype: DtypeArg | None = None,
+        skip_table_creation: bool = False,
     ) -> None:
         self.name = name
         self.pd_sql = pandas_sql_engine
@@ -950,6 +951,7 @@ class SQLTable(PandasObject):
         self.if_exists = if_exists
         self.keys = keys
         self.dtype = dtype
+        self.skip_table_creation = skip_table_creation
 
         if frame is not None:
             # We want to initialize based on a dataframe
@@ -979,6 +981,8 @@ class SQLTable(PandasObject):
             self.table.create(bind=self.pd_sql.con)
 
     def create(self) -> None:
+        if self.skip_table_creation:
+            return
         if self.exists():
             if self.if_exists == "fail":
                 raise ValueError(f"Table '{self.name}' already exists.")
@@ -2810,6 +2814,7 @@ class SQLiteDatabase(PandasSQL):
         dtype: DtypeArg | None = None,
         method: Literal["multi"] | Callable | None = None,
         engine: str = "auto",
+        skip_table_creation: bool = False,
         **engine_kwargs,
     ) -> int | None:
         """
@@ -2875,6 +2880,7 @@ class SQLiteDatabase(PandasSQL):
             if_exists=if_exists,
             index_label=index_label,
             dtype=dtype,
+            skip_table_creation=skip_table_creation,
         )
         table.create()
         return table.insert(chunksize, method)
