@@ -174,7 +174,7 @@ def kleene_and(
     if right_mask is None:
         # Scalar `right`
         if right is libmissing.NA:
-            mask = (left & ~left_mask) | left_mask
+            mask = np.ones_like(left_mask)
 
         else:
             mask = left_mask.copy()
