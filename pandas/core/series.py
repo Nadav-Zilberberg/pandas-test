@@ -4464,6 +4464,9 @@ class Series(base.IndexOpsMixin, NDFrame):  # type: ignore[misc]
         if callable(func):
             func = functools.partial(func, **kwargs)
         new_values = self._map_values(func, na_action=na_action)
+        from pandas.core.dtypes.common import is_bool_dtype
+        if is_bool_dtype(new_values) and new_values.nunique() <= 2:
+            new_values = new_values.astype(bool)
         return self._constructor(new_values, index=self.index, copy=False).__finalize__(
             self, method="map"
         )
