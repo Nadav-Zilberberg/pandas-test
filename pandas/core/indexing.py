@@ -1988,9 +1988,8 @@ class _iLocIndexer(_LocationIndexer):
                     #  where we treat as df.iloc[:3, 1] = 0
                     return self._setitem_with_indexer((pi, info_axis[0]), value[0])
 
-                raise ValueError(
-                    "Must have equal len keys and value when setting with an iterable"
-                )
+                keys = indexer[1]
+                raise ValueError(f"Must have equal len(keys)={len(keys)} and len(value)={len(value)} when setting with an iterable")
 
             elif lplane_indexer == 0 and len(value) == len(self.obj.index):
                 # We get here in one case via .loc with a all-False mask
@@ -2016,9 +2015,8 @@ class _iLocIndexer(_LocationIndexer):
                 self._setitem_single_column(ilocs[0], value, pi)
 
             else:
-                raise ValueError(
-                    "Must have equal len keys and value when setting with an iterable"
-                )
+                keys = indexer[1]
+                raise ValueError(f"Must have equal len(keys)={len(keys)} and len(value)={len(value)} when setting with an iterable")
 
         else:
             # scalar value
