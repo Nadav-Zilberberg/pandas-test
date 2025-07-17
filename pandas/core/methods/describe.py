@@ -27,6 +27,7 @@ from pandas.util._validators import validate_percentile
 from pandas.core.dtypes.common import (
     is_bool_dtype,
     is_numeric_dtype,
+    is_datetime64_any_dtype,
 )
 from pandas.core.dtypes.dtypes import (
     ArrowDtype,
@@ -187,6 +188,10 @@ class DataFrameDescriber(NDFrameDescriberAbstract):
             # when some numerics are found, keep only numerics
             default_include: list[npt.DTypeLike] = [np.number, "datetime"]
             data = self.obj.select_dtypes(include=default_include)
+            if len(data.columns) == 0 and any(is_datetime64_any_dtype(x) for x in self.obj.dtypes):
+                data = self.obj.select_dtypes(include=default_include)
+            elif len(data.columns) == 0 and self.include == ['datetime']:
+                return self.obj._constructor()
             if len(data.columns) == 0:
                 data = self.obj
         elif self.include == "all":
