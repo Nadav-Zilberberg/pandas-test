@@ -194,7 +194,9 @@ class DataFrameDescriber(NDFrameDescriberAbstract):
             # when some numerics are found, keep only numerics
             default_include: list[npt.DTypeLike] = [np.number, "datetime"]
             data = self.obj.select_dtypes(include=default_include)
-            if len(data.columns) == 0:
+            if len(data.columns) == 0 and default_include:
+                raise ValueError("No columns with datetime dtype found to describe.")
+            elif len(data.columns) == 0:
                 data = self.obj
         elif self.include == "all":
             if self.exclude is not None:
