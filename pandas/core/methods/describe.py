@@ -164,7 +164,14 @@ class DataFrameDescriber(NDFrameDescriberAbstract):
         super().__init__(obj)
 
     def describe(self, percentiles: Sequence[float] | np.ndarray) -> DataFrame:
+        import pandas as pd
         data = self._select_data()
+        if data.empty:
+            return pd.DataFrame()
+
+        ldesc: list[Series] = []
+        if not data.columns.size:
+            return pd.DataFrame()
 
         ldesc: list[Series] = []
         for _, series in data.items():
