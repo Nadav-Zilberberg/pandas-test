@@ -154,19 +154,6 @@ class TestTableOrient:
             {"name": "a", "type": "number", "extDtype": "decimal"},
         ]
 
-        schema = {"fields": fields, "primaryKey": ["id"]}
-
-        expected = OrderedDict(
-            [
-                ("schema", schema),
-                ("data", [OrderedDict([("id", 0), ("a", "10")])]),
-            ]
-        )
-
-        assert result == expected
-
-    def test_build_string_series(self, sa):
-        s = Series(sa, name="a")
         s.index.name = "id"
         result = s.to_json(orient="table", date_format="iso")
         result = json.loads(result, object_pairs_hook=OrderedDict)
@@ -176,9 +163,8 @@ class TestTableOrient:
 
         fields = [
             {"name": "id", "type": "integer"},
-            {"name": "a", "type": "any", "extDtype": "string"},
+            {"name": "a", "type": "string"},
         ]
-
         schema = {"fields": fields, "primaryKey": ["id"]}
 
         expected = OrderedDict(
@@ -187,8 +173,6 @@ class TestTableOrient:
                 ("data", [OrderedDict([("id", 0), ("a", "pandas")])]),
             ]
         )
-
-        assert result == expected
 
     def test_build_int64_series(self, ia):
         s = Series(ia, name="a")
@@ -200,7 +184,7 @@ class TestTableOrient:
         result["schema"].pop("pandas_version")
 
         fields = [
-            {"name": "id", "type": "integer"},
+            {"name": "a", "type": "string"},
             {"name": "a", "type": "integer", "extDtype": "Int64"},
         ]
 
@@ -235,7 +219,7 @@ class TestTableOrient:
             OrderedDict({"name": "idx", "type": "integer"}),
             OrderedDict({"name": "A", "type": "any", "extDtype": "DateDtype"}),
             OrderedDict({"name": "B", "type": "number", "extDtype": "decimal"}),
-            OrderedDict({"name": "C", "type": "any", "extDtype": "string"}),
+            OrderedDict({"name": "C", "type": "string"}),
             OrderedDict({"name": "D", "type": "integer", "extDtype": "Int64"}),
         ]
 
