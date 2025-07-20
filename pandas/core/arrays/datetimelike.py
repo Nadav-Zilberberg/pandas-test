@@ -384,6 +384,8 @@ class DatetimeLikeArrayMixin(  # type: ignore[misc]
         This getitem defers to the underlying array, which by-definition can
         only handle list-likes, slices, and integer scalars
         """
+        if isinstance(key, tuple):
+            raise ValueError("Multidimensional indexing is not supported.")
         # Use cast as we know we will get back a DatetimeLikeArray or DTScalar,
         # but skip evaluating the Union at runtime for performance
         # (see https://github.com/pandas-dev/pandas/pull/44624)

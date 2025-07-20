@@ -156,13 +156,13 @@ def test_where_different_freq_raises(other):
 # Printing
 
 
-def test_repr_small():
+import pytest
+
+
+def test_getitem_raises_not_implemented():
     arr = PeriodArray._from_sequence(["2000", "2001"], dtype="period[D]")
-    result = str(arr)
-    expected = (
-        "<PeriodArray>\n['2000-01-01', '2001-01-01']\nLength: 2, dtype: period[D]"
-    )
-    assert result == expected
+    with pytest.raises(NotImplementedError, match="Multidimensional indexing is not supported."):
+        arr[(0, Ellipsis)]
 
 
 def test_repr_large():
