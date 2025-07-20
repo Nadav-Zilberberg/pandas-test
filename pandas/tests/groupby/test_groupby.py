@@ -2995,4 +2995,15 @@ def test_groupby_datetime_with_nat():
     )
     grouped = df.groupby("a", dropna=False)
     result = len(grouped)
+import numpy as np
+import pandas as pd
+import pytest
+
+
+def test_groupby_rank_pyarrow():
+    df = pd.DataFrame({'a': [3,6,1,1,None,6]}, dtype='Int64[pyarrow]')
+    df['a_mask'] = df['a'].isna()
+    result = df.groupby('a_mask').rank(method='min')
+    expected = pd.DataFrame({'a': [3.0, 4.0, 1.0, 1.0, None, 4.0]})
+    pd.testing.assert_frame_equal(result, expected)
     assert result == 3

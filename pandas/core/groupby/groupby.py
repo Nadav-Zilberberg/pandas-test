@@ -4819,6 +4819,13 @@ class GroupBy(BaseGroupBy[NDFrameT]):
             "pct": pct,
         }
 
+        import numpy as np
+        from pandas.core.dtypes.dtypes import ArrowDtype
+
+        obj = self._obj_with_exclusions
+        if isinstance(obj.dtype, ArrowDtype):
+            obj = obj.astype(np.float64)
+
         return self._cython_transform(
             "rank",
             numeric_only=False,
