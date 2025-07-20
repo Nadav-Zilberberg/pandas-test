@@ -190,6 +190,8 @@ class DataFrameDescriber(NDFrameDescriberAbstract):
             if len(data.columns) == 0 and default_include:
                 raise ValueError("No columns with datetime dtype found to describe.")
             elif len(data.columns) == 0:
+                raise ValueError("No columns with datetime dtype found to describe.")
+            elif len(data.columns) == 0:
                 data = self.obj
         elif self.include == "all":
             if self.exclude is not None:
