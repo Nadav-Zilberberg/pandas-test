@@ -1064,6 +1064,18 @@ def rank(
         Whether or not to the display the returned rankings in integer form
         (e.g. 1, 2, 3) or in percentile form (e.g. 0.333..., 0.666..., 1).
     """
+    if is_object_dtype(values.dtype):
+        inferred = lib.infer_dtype(values, skipna=True)
+        if inferred in ["floating", "integer", "mixed-integer-float"]:
+            arr = pd_array(values, dtype=np.float64)
+            return arr.rank(
+                axis=axis,
+                method=method,
+                na_option=na_option,
+                ascending=ascending,
+                pct=pct,
+            )
+
     is_datetimelike = needs_i8_conversion(values.dtype)
     values = _ensure_data(values)
 
