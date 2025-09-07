@@ -11,6 +11,7 @@ from libc.stdlib cimport (
 from libc.string cimport memmove
 
 import numpy as np
+import pandas as pd
 
 cimport numpy as cnp
 from numpy cimport (
@@ -970,6 +971,9 @@ def rank_1d(
         numeric_object_t[:] masked_vals_memview
         bint keep_na, nans_rank_highest, check_labels, check_mask
         numeric_object_t nan_fill_val
+
+    if values.dtype == np.object_:
+        values = pd.to_numeric(values, errors="coerce")
 
     tiebreak = tiebreakers[ties_method]
     if tiebreak == TIEBREAK_FIRST:
