@@ -74,7 +74,8 @@ tiebreakers = {
 
 cdef bint are_diff(object left, object right):
     try:
-        return fabs(left - right) > FP_ERR
+        # GH#45499 try to interpret as float64
+        return <float64_t>left != <float64_t>right
     except TypeError:
         return left != right
 
