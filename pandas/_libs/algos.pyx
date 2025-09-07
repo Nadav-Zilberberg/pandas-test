@@ -858,7 +858,7 @@ def is_monotonic(const numeric_object_t[:] arr, bint timelike):
 # rank_1d, rank_2d
 # ----------------------------------------------------------------------
 
-cdef numeric_object_t get_rank_nan_fill_val(
+cdef numeric_object_t get_rank_nan_fill_val(Py_ssize_t rank_nans_highest,
     bint rank_nans_highest,
     numeric_object_t val,
     bint is_datetimelike=False,
@@ -868,7 +868,7 @@ cdef numeric_object_t get_rank_nan_fill_val(
     on if we'd like missing values to end up at the top/bottom. (The second parameter
     is unused, but needed for fused type specialization)
     """
-    if numeric_object_t is int64_t and is_datetimelike and not rank_nans_highest:
+    if numeric_object_t is int64_t and is_datetimelike and not rank_nans_highest and not isinstance(val, (float, int, np.number)):
         return NPY_NAT + 1
 
     if rank_nans_highest:
