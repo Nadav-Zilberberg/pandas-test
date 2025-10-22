@@ -1950,46 +1950,84 @@ class _MergeOperation:
 
         return left_on, right_on
 
-    @final
+        @final
     def _validate_validate_kwd(self, validate: str) -> None:
         # Check uniqueness of each
         if self.left_index:
-            left_unique = self.orig_left.index.is_unique
+            left_keys = self.orig_left.index
+            left_unique = left_keys.is_unique
         else:
-            left_unique = MultiIndex.from_arrays(self.left_join_keys).is_unique
+            left_keys = MultiIndex.from_arrays(self.left_join_keys)
+            left_unique = left_keys.is_unique
 
         if self.right_index:
-            right_unique = self.orig_right.index.is_unique
+            right_keys = self.orig_right.index
+            right_unique = right_keys.is_unique
         else:
-            right_unique = MultiIndex.from_arrays(self.right_join_keys).is_unique
+            right_keys = MultiIndex.from_arrays(self.right_join_keys)
+            right_unique = right_keys.is_unique
+
+        def _get_duplicated_keys_message(keys: MultiIndex, side: str) -> str:
+            duplicated_keys = keys[keys.duplicated()].unique()
+            max_duplicates_to_show = 5
+
+            if keys.nlevels > 1:
+                # For MultiIndex, format as tuples
+                formatted_keys = [
+                    str(tuple(k)) for k in duplicated_keys[:max_duplicates_to_show]
+                ]
+            else:
+                # For single Index, format as is
+                formatted_keys = [
+                    str(k) for k in duplicated_keys[:max_duplicates_to_show]
+                ]
+
+            keys_str = ", ".join(formatted_keys)
+            extra_message = ""
+            if len(duplicated_keys) > max_duplicates_to_show:
+                extra_message = (
+                    f" ({len(duplicated_keys) - max_duplicates_to_show} more)"
+                )
+
+            return f"On {side} key(s): [{keys_str}{extra_message}]"
 
         # Check data integrity
         if validate in ["one_to_one", "1:1"]:
             if not left_unique and not right_unique:
+                left_dupes = _get_duplicated_keys_message(left_keys, "left")
+                right_dupes = _get_duplicated_keys_message(right_keys, "right")
                 raise MergeError(
                     "Merge keys are not unique in either left "
-                    "or right dataset; not a one-to-one merge"
+                    "or right dataset; not a one-to-one merge. "
+                    f"{left_dupes}. {right_dupes}."
                 )
             if not left_unique:
+                left_dupes = _get_duplicated_keys_message(left_keys, "left")
                 raise MergeError(
-                    "Merge keys are not unique in left dataset; not a one-to-one merge"
+                    "Merge keys are not unique in left dataset; "
+                    f"not a one-to-one merge. {left_dupes}."
                 )
             if not right_unique:
+                right_dupes = _get_duplicated_keys_message(right_keys, "right")
                 raise MergeError(
-                    "Merge keys are not unique in right dataset; not a one-to-one merge"
+                    "Merge keys are not unique in right dataset; "
+                    f"not a one-to-one merge. {right_dupes}."
                 )
 
         elif validate in ["one_to_many", "1:m"]:
             if not left_unique:
+                left_dupes = _get_duplicated_keys_message(left_keys, "left")
                 raise MergeError(
-                    "Merge keys are not unique in left dataset; not a one-to-many merge"
+                    "Merge keys are not unique in left dataset; "
+                    f"not a one-to-many merge. {left_dupes}."
                 )
 
         elif validate in ["many_to_one", "m:1"]:
             if not right_unique:
+                right_dupes = _get_duplicated_keys_message(right_keys, "right")
                 raise MergeError(
                     "Merge keys are not unique in right dataset; "
-                    "not a many-to-one merge"
+                    f"not a many-to-one merge. {right_dupes}."
                 )
 
         elif validate in ["many_to_many", "m:m"]:
@@ -1998,17 +2036,24 @@ class _MergeOperation:
         else:
             raise ValueError(
                 f'"{validate}" is not a valid argument. '
-                "Valid arguments are:\n"
-                '- "1:1"\n'
-                '- "1:m"\n'
-                '- "m:1"\n'
-                '- "m:m"\n'
-                '- "one_to_one"\n'
-                '- "one_to_many"\n'
-                '- "many_to_one"\n'
+                "Valid arguments are:
+"
+                '- "1:1"
+'
+                '- "1:m"
+'
+                '- "m:1"
+'
+                '- "m:m"
+'
+                '- "one_to_one"
+'
+                '- "one_to_many"
+'
+                '- "many_to_one"
+'
                 '- "many_to_many"'
             )
-
 
 def get_join_indexers(
     left_keys: list[ArrayLike],
