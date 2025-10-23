@@ -1963,34 +1963,65 @@ class _MergeOperation:
         else:
             right_unique = MultiIndex.from_arrays(self.right_join_keys).is_unique
 
+        def _get_dupes_msg(keys: list, side: str) -> str:
+            # Helper to get a message for duplicate keys
+            keys_mi = MultiIndex.from_arrays(keys)
+            dupes = keys_mi[keys_mi.duplicated()].unique()
+
+            # PR description says to cut off after a few values
+            max_dupes_to_show = 5
+            if len(dupes) > max_dupes_to_show:
+                dupes_to_show = dupes[:max_dupes_to_show]
+                extra_msg = f", showing first {max_dupes_to_show}"
+            else:
+                dupes_to_show = dupes
+                extra_msg = ""
+
+            # Show tuples for MultiIndex, but single values for single key
+            if keys_mi.nlevels == 1:
+                dupes_str = ", ".join(map(str, dupes_to_show.get_level_values(0)))
+            else:
+                dupes_str = ", ".join(map(str, list(dupes_to_show)))
+
+            return f". Duplicates in {side} key(s): [{dupes_str}]{extra_msg}."
+
         # Check data integrity
         if validate in ["one_to_one", "1:1"]:
             if not left_unique and not right_unique:
-                raise MergeError(
+                msg = (
                     "Merge keys are not unique in either left "
                     "or right dataset; not a one-to-one merge"
                 )
+                msg += _get_dupes_msg(self.left_join_keys, "left")
+                msg += _get_dupes_msg(self.right_join_keys, "right")
+                raise MergeError(msg)
             if not left_unique:
-                raise MergeError(
-                    "Merge keys are not unique in left dataset; not a one-to-one merge"
-                )
+                msg = "Merge keys are not unique in left dataset; not a one-to-one merge"
+                msg += _get_dupes_msg(self.left_join_keys, "left")
+                raise MergeError(msg)
             if not right_unique:
-                raise MergeError(
+                msg = (
                     "Merge keys are not unique in right dataset; not a one-to-one merge"
                 )
+                msg += _get_dupes_msg(self.right_join_keys, "right")
+                raise MergeError(msg)
 
         elif validate in ["one_to_many", "1:m"]:
             if not left_unique:
-                raise MergeError(
+                msg = (
                     "Merge keys are not unique in left dataset; not a one-to-many merge"
                 )
+                msg += _get_dupes_msg(self.left_join_keys, "left")
+                raise MergeError(msg)
 
         elif validate in ["many_to_one", "m:1"]:
             if not right_unique:
-                raise MergeError(
+                msg = (
                     "Merge keys are not unique in right dataset; "
                     "not a many-to-one merge"
                 )
+                msg += _get_dupes_msg(self.right_join_keys, "right")
+                raise MergeError(msg)
 
         elif validate in ["many_to_many", "m:m"]:
             pass
@@ -2008,7 +2039,6 @@ class _MergeOperation:
                 '- "many_to_one"\n'
                 '- "many_to_many"'
             )
-
 
 def get_join_indexers(
     left_keys: list[ArrayLike],
